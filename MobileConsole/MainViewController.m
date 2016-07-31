@@ -6,20 +6,19 @@
 //  Copyright (c) 2014 vsnRain. All rights reserved.
 //
 
-#import "ViewController.h"
+#import "MainViewController.h"
 
-#import <asl.h>
-#import <stdio.h>
-#import <sys/un.h>
-#import <sys/socket.h>
-#import <unistd.h>
-#import <poll.h>
-
-#include "NSTask.h"
+#include <asl.h>
+#include <stdio.h>
+#include <sys/un.h>
+#include <sys/socket.h>
+#include <unistd.h>
+#include <poll.h>
+#include <errno.h>
 
 #define SV_SOCK_PATH "/private/var/run/lockdown/syslog.sock"
 
-@interface ViewController (){
+@interface MainViewController (){
     
     int socket_fd;
     char buffer[1024];
@@ -29,7 +28,7 @@
 
 @end
 
-@implementation ViewController
+@implementation MainViewController
 
 - (void)viewDidLoad
 {
@@ -37,7 +36,7 @@
     
     // ==================== UI ====================
     
-    UIEdgeInsets contentInsets = UIEdgeInsetsMake(self.navigationBar.bounds.size.height, 0.0, self.toolbar.bounds.size.height, 0);
+    UIEdgeInsets contentInsets = UIEdgeInsetsMake(self.navigationBar.bounds.size.height, 0.0, 0, 0);
     self.logView.contentInset = contentInsets;
     self.logView.scrollIndicatorInsets = contentInsets;
     
@@ -60,7 +59,7 @@
     long res = connect(socket_fd, (struct sockaddr *) &address, sizeof(struct sockaddr_un));
     
     if(res != 0){
-        printf("connect() failed\n");
+        printf("connect() failed with error %s\n",strerror(errno));
         //return 1;
     }
     
@@ -218,8 +217,16 @@
     }
 }
 
-- (UIBarPosition)positionForBar:(id<UIBarPositioning>)bar {
+- (UIBarPosition) positionForBar:(id <UIBarPositioning>)bar {
     return UIBarPositionTopAttached;
+}
+
+- (BOOL) prefersStatusBarHidden {
+    return NO;
+}
+
+-(BOOL) shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation{
+    return YES;
 }
 
 - (void)didReceiveMemoryWarning
